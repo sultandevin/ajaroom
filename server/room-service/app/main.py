@@ -14,7 +14,7 @@ def on_startup():
 
 
 app.include_router(room.router, prefix="/rooms", tags=["rooms"])
-# app.include_router(booking.router, prefix="/bookings", tags=["bookings"])
+app.include_router(booking.router, prefix="/bookings", tags=["bookings"])
 
 
 @app.get("/")
