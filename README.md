@@ -1,6 +1,6 @@
 ## 🗃️ DB Schema
 
-![DB Schema](https://github.com/user-attachments/assets/db066c8e-a71f-42de-945b-0c5f3310ec36)
+![DB Schema](https://github.com/user-attachments/assets/1216bf1c-ed81-4f00-bd23-3c9df90eba98)
 
 ## 🖥️ Running server locally
 
