@@ -2,8 +2,8 @@ from typing import Annotated
 from fastapi import APIRouter, HTTPException, Query, Depends
 from sqlmodel import Session, select
 from app.models.booking import Booking
-from app.schemas.booking import BookingCreate
 from app.services.db import get_session
+from dateutil.parser import isoparse
 
 router = APIRouter()
 SessionDep = Annotated[Session, Depends(get_session)]
@@ -17,11 +17,11 @@ def read_booking(
 
 
 @router.post("/", response_model=Booking)
-def create_booking(data: BookingCreate, session: SessionDep) -> Booking:
+def create_booking(booking: Booking, session: SessionDep) -> Booking:
     booking = Booking(
-        start_time=data.start_time,
-        end_time=data.end_time,
-        status=data.status,
+        start_time=isoparse(str(booking.start_time)),
+        end_time=isoparse(str(booking.end_time)),
+        status=booking.status,
     )
     session.add(booking)
     session.commit()
@@ -38,9 +38,9 @@ def read_bookin(booking_id: int, session: SessionDep) -> Booking:
 
 @router.delete("/{booking_id}")
 def delete_booking(booking_id: int, session: SessionDep):
-    hero = session.get(Booking, booking_id)
-    if not hero:
+    booking = session.get(Booking, booking_id)
+    if not booking:
         raise HTTPException(status_code=404, detail="Booking not found")
-    session.delete(hero)
+    session.delete(booking )
     session.commit()
     return {"ok": True, "message": f"Booking {booking_id} deleted successfully"}
