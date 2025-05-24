@@ -1,1 +1,18 @@
 services:
+    room-service:
+        container_name: room-service
+        build: ./room-service
+        ports:
+            - "5000:5000"
+        volumes:
+            - ./room-service:/app
+        restart: unless-stopped
+
+    auth-service:
+        container_name: auth-service
+        build: ./auth-service
+        ports:
+            - "5001:5000"
+        volumes:
+            - ./auth-service:/app
+        restart: unless-stopped
