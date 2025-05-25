@@ -16,9 +16,13 @@ class UserClass(BaseModel):
     username: str
     password: str
     email: str
-    admin: bool = False
+    admin: bool
 
 class RegUserClass(BaseModel):
     username: str
     password: str
     email: str
+
+class LoginRequest(BaseModel):
+    usernameormail: str
+    password: str

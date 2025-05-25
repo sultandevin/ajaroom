@@ -1,9 +1,8 @@
 from typing import Annotated
 from fastapi import APIRouter, HTTPException, Query, Depends, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from app.service.db import getDB
-from app.models.user import RegUserClass
+from app.models.user import RegUserClass, LoginRequest
 from app.controllers.user import (
     get_user_by_name,
     get_user_by_email,
@@ -27,9 +26,9 @@ def register_user(db: Annotated[Session, Depends(getDB)], user: RegUserClass):
 @router.post("/token")
 def login_for_acc_token(
     db: Annotated[Session, Depends(getDB)],
-    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    form_data: LoginRequest,
 ):
-    user = authenticate_user(db, form_data.username, form_data.password)
+    user = authenticate_user(db, form_data.usernameormail, form_data.password)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -44,5 +43,4 @@ def login_for_acc_token(
 
 @router.get("/verify-token/{token}")
 async def verify_user_token(token: str):
-    verify_token(token)
-    return {"message": "Valid token"}
+    return verify_token(token)
