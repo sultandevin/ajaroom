@@ -30,7 +30,7 @@ app.add_middleware(
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-app.include_router(user.router, prefix="/auth", tags=["auth"])
+app.include_router(user.router, tags=["auth"])
 
 
 @app.get("/")
