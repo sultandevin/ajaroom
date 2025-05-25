@@ -19,7 +19,6 @@ class Room(RoomBase, table=True):
 class RoomCreate(RoomBase):
     pass
 
-
 # Representation of a room for public API responses
 class RoomPublic(RoomBase):
     id: int

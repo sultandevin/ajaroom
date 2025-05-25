@@ -1,8 +1,7 @@
-# TO DO: Fahmi
 from sqlmodel import Field, SQLModel
 from datetime import datetime
 from enum import Enum
-
+from typing import Optional
 
 class BookingStatus(str, Enum):
     pending = "pending"
@@ -27,6 +26,12 @@ class Booking(BookingBase, table=True):
 class BookingCreate(BookingBase):
     pass
 
+# Payload for updating a booking
+class BookingUpdate(SQLModel):
+    room_id: Optional[int] = Field(default=None, foreign_key="room.id")
+    start_time: Optional[datetime] = None
+    end_time: Optional[datetime] = None
+    status: Optional[BookingStatus] = None
 
 # Representation of a booking for public API responses
 class BookingPublic(BookingBase):

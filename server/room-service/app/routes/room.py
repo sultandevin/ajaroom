@@ -17,6 +17,7 @@ async def read_rooms(
 
 @router.post("/")
 async def create_room(room: RoomCreate, session: SessionDep) -> RoomPublic:
+    room = Room.from_orm(room)
     session.add(room)
     session.commit()
     session.refresh(room)

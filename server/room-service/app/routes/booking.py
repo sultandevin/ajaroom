@@ -1,7 +1,7 @@
 from typing import Annotated
 from fastapi import APIRouter, HTTPException, Query, Depends
 from sqlmodel import Session, select
-from app.models.booking import Booking, BookingCreate, BookingPublic
+from app.models.booking import Booking, BookingCreate, BookingUpdate, BookingPublic
 from app.models.room import Room
 from app.services.db import get_session
 from dateutil.parser import isoparse
@@ -44,6 +44,20 @@ async def read_booking(booking_id: int, session: SessionDep) -> BookingPublic:
         raise HTTPException(status_code=404, detail="Booking not found")
     return booking
 
+@router.put("/{booking_id}", response_model=Booking)
+async def update_booking(booking_id: int, booking_data: BookingUpdate, session: SessionDep) -> BookingPublic:
+    booking = session.get(Booking, booking_id)
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+
+    booking_data_dict = booking_data.dict(exclude_unset=True)
+    for key, value in booking_data_dict.items():
+        setattr(booking, key, value)
+
+    session.add(booking)
+    session.commit()
+    session.refresh(booking)
+    return booking
 
 @router.delete("/{booking_id}")
 async def delete_booking(booking_id: int, session: SessionDep):
