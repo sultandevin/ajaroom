@@ -32,8 +32,10 @@ async def gateway(service: str, path: str, request: Request):
     body = await request.json() if request.method in ["POST", "PUT", "PATCH"] else None
     headers = dict(request.headers)
 
-    response = await forward_request(
-        service_url, request.method, f"/{path}", body, headers
-    )
+    # Ensure path starts with / for proper routing
+    if not path.startswith("/"):
+        path = f"/{path}"
+
+    response = await forward_request(service_url, request.method, path, body, headers)
 
     return JSONResponse(status_code=response.status_code, content=response.json())
