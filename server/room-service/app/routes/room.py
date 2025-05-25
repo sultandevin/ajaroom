@@ -17,11 +17,11 @@ async def read_rooms(
 
 @router.post("/")
 async def create_room(room: RoomCreate, session: SessionDep) -> RoomPublic:
-    room = Room.from_orm(room)
-    session.add(room)
+    db_room = Room.model_validate(room)
+    session.add(db_room)
     session.commit()
-    session.refresh(room)
-    return room
+    session.refresh(db_room)
+    return db_room
 
 
 @router.get("/{room_id}")
