@@ -16,3 +16,13 @@ services:
         volumes:
             - ./auth-service:/app
         restart: unless-stopped
+
+    api-gateway:
+        container_name: api-gateway
+        build: ./api-gateway
+        ports:
+            - "8000:8000"
+        depends_on:
+            - auth-service
+            - room-service
+        restart: unless-stopped
