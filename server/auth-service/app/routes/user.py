@@ -3,14 +3,14 @@ from fastapi import APIRouter, HTTPException, Query, Depends, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from app.service.db import getDB
-from app.models.user import UserClass
+from app.models.user import RegUserClass
 from app.controllers.user import get_user_by_name, get_user_by_email, create_user, authenticate_user
 from app.controllers.jwt import create_access_token, verify_token
 
 router = APIRouter()
 
 @router.post("/register")
-def register_user(db: Annotated[Session, Depends(getDB)], user: UserClass):
+def register_user(db: Annotated[Session, Depends(getDB)], user: RegUserClass):
     if get_user_by_name(db, user.username) or get_user_by_email(db, user.email):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
