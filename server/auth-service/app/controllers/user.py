@@ -1,6 +1,6 @@
 import os
 from sqlalchemy.orm import Session
-from app.models.user import User, UserClass
+from app.models.user import User, RegUserClass
 from passlib.context import CryptContext
 
 hash_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -11,11 +11,11 @@ def get_user_by_name(db: Session, username: str):
 def get_user_by_email(db: Session, email: str):
     return db.query(User).filter(User.email == email).first()
 
-def create_user(db: Session, user: UserClass):
+def create_user(db: Session, user: RegUserClass):
     new_user=User(
         username=user.username,
         email=user.email,
-        admin=user.admin, 
+        admin=False, 
         hashed_password=hash_context.hash(user.password)
     )
     db.add(new_user)
