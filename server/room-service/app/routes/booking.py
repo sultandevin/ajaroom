@@ -1,12 +1,15 @@
-from typing import Annotated
+from typing import Annotated, Dict
 from fastapi import APIRouter, HTTPException, Query, Depends
 from sqlmodel import Session, select
 from app.models.booking import Booking, BookingCreate, BookingUpdate, BookingPublic
 from app.models.room import Room
 from app.services.db import get_session
+from app.controllers.auth import ensure_authenticated, oauth2_scheme
 from dateutil.parser import isoparse
+import os
+import httpx
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(ensure_authenticated)])
 SessionDep = Annotated[Session, Depends(get_session)]
 
 
@@ -18,25 +21,28 @@ async def read_booking(
 
 
 @router.post("/", response_model=BookingPublic)
-async def create_booking(booking: BookingCreate, session: SessionDep) -> BookingPublic:
-    db_booking = Booking.model_validate(booking)
-    room = session.get(Room, db_booking.room_id)
+async def create_booking(
+    booking: Booking,
+    session: SessionDep,
+    token: Annotated[str, Depends(oauth2_scheme)],
+) -> BookingPublic:
+    room = session.get(Room, booking.room_id)
     if not room:
         raise HTTPException(
-            status_code=400, detail=f"Room with ID {db_booking.room_id} does not exist"
+            status_code=400, detail=f"Room with ID {booking.room_id} does not exist"
         )
 
-    start_time = isoparse(str(db_booking.start_time))
-    end_time = isoparse(str(db_booking.end_time))
+    start_time = isoparse(str(booking.start_time))
+    end_time = isoparse(str(booking.end_time))
 
     if start_time >= end_time:
         raise HTTPException(
             status_code=400, detail="Start time must be earlier than end time."
         )
 
-    if db_booking.status == "confirmed":
+    if booking.status == "confirmed":
         conflict_stmt = select(Booking).where(
-            Booking.room_id == db_booking.room_id,
+            Booking.room_id == booking.room_id,
             Booking.status == "confirmed",
             Booking.end_time > start_time,
             Booking.start_time < end_time,
@@ -48,16 +54,43 @@ async def create_booking(booking: BookingCreate, session: SessionDep) -> Booking
                 detail=f"Conflict with existing confirmed booking (ID: {conflict.id})",
             )
 
-    booking = Booking(
-        room_id=db_booking.room_id,
+    # Get user information from user service
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.get(
+                f"{os.getenv('AUTH_SERVICE_URL', 'http://auth-service:5000')}/me",
+                headers={"Authorization": f"Bearer {token}"},
+            )
+            print(response)
+            response.raise_for_status()
+            user_data = response.json()
+            user_email = user_data.get("email")
+            if not user_email:
+                raise HTTPException(
+                    status_code=400,
+                    detail="User email not found in user service response",
+                )
+        except httpx.RequestError as e:
+            raise HTTPException(
+                status_code=503, detail=f"Error contacting user service: {str(e)}"
+            )
+        except httpx.HTTPStatusError as e:
+            raise HTTPException(
+                status_code=e.response.status_code,
+                detail=f"User service error: {str(e)}",
+            )
+
+    booking_to_save = Booking(
+        user_email=user_email,
+        room_id=booking.room_id,
         start_time=start_time,
         end_time=end_time,
-        status=db_booking.status,
+        status=booking.status,
     )
-    session.add(db_booking)
+    session.add(booking_to_save)
     session.commit()
-    session.refresh(db_booking)
-    return db_booking
+    session.refresh(booking_to_save)
+    return booking_to_save
 
 
 @router.get("/{booking_id}")

@@ -42,11 +42,13 @@ def seed_data():
         bookings = [
             Booking(
                 room_id=1,
+                user_email="admin@gmail.com",
                 start_time=datetime.fromisoformat("2025-06-01T09:00"),
                 end_time=datetime.fromisoformat("2025-06-01T11:00"),
             ),
             Booking(
                 room_id=2,
+                user_email="admin@gmail.com",
                 start_time=datetime.fromisoformat("2025-06-01T10:00"),
                 end_time=datetime.fromisoformat("2025-06-01T12:00"),
             ),
