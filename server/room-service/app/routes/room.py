@@ -1,7 +1,7 @@
 from typing import Annotated
 from fastapi import APIRouter, HTTPException, Query, Depends
 from sqlmodel import Session, select
-from app.models.room import Room
+from app.models.room import RoomCreate, RoomPublic, Room
 from app.services.db import get_session
 
 router = APIRouter()
@@ -11,12 +11,12 @@ SessionDep = Annotated[Session, Depends(get_session)]
 @router.get("/")
 async def read_rooms(
     session: SessionDep, start: int = 1, end: Annotated[int, Query(le=100)] = 10
-) -> list[Room]:
+) -> list[RoomPublic]:
     return session.exec(select(Room).offset(start - 1).limit(end - start + 1)).all()
 
 
 @router.post("/")
-async def create_room(room: Room, session: SessionDep) -> Room:
+async def create_room(room: RoomCreate, session: SessionDep) -> RoomPublic:
     session.add(room)
     session.commit()
     session.refresh(room)
@@ -24,7 +24,7 @@ async def create_room(room: Room, session: SessionDep) -> Room:
 
 
 @router.get("/{room_id}")
-async def read_room(room_id: int, session: SessionDep) -> Room:
+async def read_room(room_id: int, session: SessionDep) -> RoomPublic:
     room = session.get(Room, room_id)
     if not room:
         raise HTTPException(status_code=404, detail="Room not found")

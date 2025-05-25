@@ -11,9 +11,23 @@ class BookingStatus(str, Enum):
     declined = "declined"
 
 
-class Booking(SQLModel, table=True):
-    id: int = Field(default=None, primary_key=True)
+class BookingBase(SQLModel):
     room_id: int = Field(foreign_key="room.id", index=True, nullable=False)
     start_time: datetime = Field(index=True)
     end_time: datetime = Field(index=True)
     status: BookingStatus = Field(default="pending", index=True)
+
+
+# Model representing a booking in the database
+class Booking(BookingBase, table=True):
+    id: int = Field(default=None, primary_key=True)
+
+
+# Payload for creating a booking
+class BookingCreate(BookingBase):
+    pass
+
+
+# Representation of a booking for public API responses
+class BookingPublic(BookingBase):
+    id: int
