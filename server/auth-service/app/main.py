@@ -10,12 +10,13 @@ from app.routes import user
 from app.service.db import create_table
 
 
-
 app = FastAPI()
+
 
 @app.on_event("startup")
 def on_startup():
     create_table()
+
 
 load_dotenv()
 
@@ -24,21 +25,19 @@ app.add_middleware(
     allow_origins=["http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["POST"],
-    allow_headers=["*"]
+    allow_headers=["*"],
 )
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 app.include_router(user.router, prefix="/auth", tags=["auth"])
 
+
 @app.get("/")
 def root():
-    return {
-        "message": "Auth Service is running."
-    }
+    return {"message": "Auth Service is running."}
 
-@app.get('/login')
+
+@app.get("/login")
 def login():
-    return {
-        "message": "Successfully logged in!"
-    }
+    return {"message": "Successfully logged in!"}

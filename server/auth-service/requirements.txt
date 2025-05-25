@@ -6,3 +6,4 @@ sqlalchemy
 pydantic
 python-jose[pycryptodome]
 passlib[bcrypt]
+python-multipart
