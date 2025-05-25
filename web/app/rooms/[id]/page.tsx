@@ -1,38 +1,37 @@
-import { Card } from "@/components/ui/card"
+"use client"
+
+import { useParams, useRouter } from "next/navigation"
+import ScheduleList from "./ScheduleList"
+import { rooms } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { ArrowLeft } from "lucide-react"
 
-interface RoomDetailProps {
-  params: {
-    id: string
-  }
-}
-
-const schedules = [
-  { time: "08:00 - 10:00", booked: true },
-  { time: "10:00 - 12:00", booked: false },
-  { time: "13:00 - 15:00", booked: false },
-  { time: "15:00 - 17:00", booked: true },
-]
-
-export default async function RoomDetailPage({ params }: RoomDetailProps) {
-  const { id: roomId } = await params
+export default function RoomDetailPage() {
+  const params = useParams()
+  const router = useRouter()
+  const roomId = params.id as string
+  const room = rooms.find((r) => r.id === Number(roomId))
 
   return (
     <main className="min-h-screen bg-muted px-6 py-10">
-      <div className="max-w-2xl mx-auto space-y-6">
-        <h1 className="text-3xl font-bold text-foreground mb-2">Jadwal Ruangan #{roomId}</h1>
-        <p className="text-muted-foreground mb-6">Berikut adalah jadwal pemakaian untuk hari ini:</p>
+      <div className="max-w-3xl mx-auto space-y-6">
+        <Button
+          variant="outline"
+          onClick={() => router.back()}
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Kembali
+        </Button>
 
-        <div className="space-y-3">
-          {schedules.map((slot, index) => (
-            <Card key={index} className="p-4 flex items-center justify-between">
-              <span className="text-sm">{slot.time}</span>
-              <Button variant={slot.booked ? "destructive" : "default"} disabled={slot.booked}>
-                {slot.booked ? "Terpakai" : "Booking"}
-              </Button>
-            </Card>
-          ))}
-        </div>
+        <h1 className="text-3xl font-bold text-foreground mb-2">
+          Jadwal {room?.name ?? `Ruangan ${roomId}`}
+        </h1>
+        <p className="text-muted-foreground text-sm mb-4">
+          Berikut adalah jadwal penggunaan ruangan ini.
+        </p>
+
+        <ScheduleList />
       </div>
     </main>
   )
