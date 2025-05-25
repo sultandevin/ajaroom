@@ -13,12 +13,22 @@ def on_startup():
     create_db_and_tables()
 
 
-app.include_router(room.router, prefix="/rooms", tags=["rooms"])
-app.include_router(booking.router, prefix="/bookings", tags=["bookings"])
+app.include_router(
+    room.router,
+    prefix="/rooms",
+    tags=["rooms"],
+    responses={404: {"description": "Not found"}},
+)
+app.include_router(
+    booking.router,
+    prefix="/bookings",
+    tags=["bookings"],
+    responses={404: {"description": "Not found"}},
+)
 
 
 @app.get("/")
 def root():
     return {
-        "message": "Welcome to the Room Service API",
+        "message": "Welcome to the Room Service API! 🚪",
     }
