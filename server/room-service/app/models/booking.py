@@ -12,33 +12,38 @@ class BookingStatus(str, Enum):
 
 
 class BookingBase(SQLModel):
-    room_id: int = Field(foreign_key="room.id", index=True, nullable=False)
-    start_time: datetime = Field(index=True)
-    end_time: datetime = Field(index=True)
+    pass
 
 
 # Model representing a booking in the database
 class Booking(BookingBase, table=True):
     id: int = Field(default=None, primary_key=True)
+    room_id: int = Field(foreign_key="room.id", index=True, nullable=False)
+    start_time: datetime = Field(index=True)
+    end_time: datetime = Field(index=True)
     user_email: str = Field(index=True, nullable=False)
     status: BookingStatus = Field(default="pending", index=True)
 
 
 # Payload for creating a booking
 class BookingCreate(BookingBase):
-    pass
+    room_id: int
+    start_time: datetime
+    end_time: datetime
+    user_email: str
+    status: BookingStatus
 
 
 # Payload for updating a booking
-class BookingUpdate(SQLModel):
-    room_id: Optional[int] = Field(default=None, foreign_key="room.id")
-    start_time: Optional[datetime] = None
-    end_time: Optional[datetime] = None
+class BookingUpdate(BookingBase):
     status: Optional[BookingStatus] = None
 
 
 # Representation of a booking for public API responses
 class BookingPublic(BookingBase):
     id: int
+    room_id: int = Field(foreign_key="room.id", index=True, nullable=False)
+    start_time: datetime = Field(index=True)
+    end_time: datetime = Field(index=True)
     user_email: str
     status: BookingStatus

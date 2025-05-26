@@ -109,11 +109,9 @@ async def update_booking(
     if not booking:
         raise HTTPException(status_code=404, detail="Booking not found")
 
-    booking_data_dict = booking_data.dict(exclude_unset=True)
-
-    start_time = isoparse(str(booking_data_dict.get("start_time", booking.start_time)))
-    end_time = isoparse(str(booking_data_dict.get("end_time", booking.end_time)))
-    status = booking_data_dict.get("status", booking.status)
+    start_time = isoparse(str(booking.start_time))
+    end_time = isoparse(str(booking.end_time))
+    status = booking_data.status
 
     if start_time >= end_time:
         raise HTTPException(
@@ -135,8 +133,7 @@ async def update_booking(
                 detail=f"Conflict with confirmed booking ID {conflict.id} in same time slot.",
             )
 
-    for key, value in booking_data_dict.items():
-        setattr(booking, key, value)
+    booking.status = booking_data.status
 
     session.add(booking)
     session.commit()
