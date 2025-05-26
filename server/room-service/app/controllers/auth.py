@@ -31,8 +31,10 @@ async def get_current_user_payload(
 
     async with httpx.AsyncClient() as client:
         try:
-            verify_url = f"{AUTH_SERVICE_BASE_URL}/verify-token/{token}"
-            response = await client.get(verify_url)
+            verify_url = f"{AUTH_SERVICE_BASE_URL}/verify-token"
+            response = await client.get(verify_url, headers={
+                'Access-Token': token
+            })
 
             if response.status_code == 200:
                 # Assuming the auth-service returns the token payload (e.g., user details)
